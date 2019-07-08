@@ -1,0 +1,17 @@
+<opml version="2.0">
+	<body>
+		<outline text="Subscriptions" title="Subscriptions">
+<outline xmlUrl='https://www.spiegel.de/schlagzeilen/index.rss' />
+<outline xmlUrl='https://www.tagesschau.de/xml/rss2' />
+<outline xmlUrl='https://www.bild.de/rssfeeds/vw-alles/vw-alles-26970192,dzbildplus=false,sort=1,teaserbildmobil=false,view=rss2,wtmc=ob.feed.bild.xml' />
+<outline xmlUrl='https://www.welt.de/feeds/latest.rss' />
+<outline xmlUrl='https://www.n-tv.de/rss' />
+<outline xmlUrl='https://newsfeed.zeit.de/all' />
+<outline xmlUrl='https://rss.focus.de/fol/XML/rss_folnews.xml' />
+<outline xmlUrl='https://www.t-online.de/themen/rss/' />
+<outline xmlUrl='https://www.faz.net/rss/aktuell/' />
+<outline xmlUrl='https://www.handelsblatt.com/contentexport/feed/schlagzeilen' />
+	
+		</outline>
+	</body>
+</opml>
