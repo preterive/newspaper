@@ -47,6 +47,7 @@ def select_all_entries():
     c.execute('select * from entries')
     return c.fetchall()
 
+    
 if __name__ == '__main__':
     #create_feeds_table()
     #create_entries_table()
