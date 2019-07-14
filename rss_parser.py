@@ -16,13 +16,13 @@ def time_struct_to_datetime(time_struct):
 
 def datetime_converter(s):
     d = parse(s)
+    # don't now why, but d has to be converted to string and back, else timezone
+    # does not work correctly
     n = d.strftime("%Y-%m-%d %H:%M:%S %z")
     n = datetime.strptime(n, "%Y-%m-%d %H:%M:%S %z")
     d = n
     if d.tzinfo != None:
-        print(s, ' - - ', d,d.tzinfo)
         p = d.strftime("%s")
-        print(p, '--', d.timestamp())
         d = datetime.utcfromtimestamp(float(p))
     return d
 
