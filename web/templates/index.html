@@ -1,0 +1,10 @@
+<html>
+    <head>
+        <title>Newspaper</title>
+    </head>
+    <body>
+        {% for entrie in entries%}
+        <div><p>{{ entrie[4]}}: <a href={{entrie[2]}}>{{ entrie[1]}}</a> {{ entrie[-1] }}</p></div>
+        {% endfor %}
+    </body>
+</html>
