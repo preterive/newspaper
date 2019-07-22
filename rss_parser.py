@@ -59,7 +59,6 @@ def input_entries_into_db(feeds, url_feeds):
             for entry in i.entries:
                 #print(entry.link)
                 try: 
-
                     summary = entry.summary
                 except:
                     summary = None
