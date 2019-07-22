@@ -18,13 +18,18 @@ def datetime_converter(s):
     d = parse(s)
     # don't know why, but d has to be converted to string and back, else timezone
     # does not work correctly
-    n = d.strftime("%Y-%m-%d %H:%M:%S %z")
-    n = datetime.strptime(n, "%Y-%m-%d %H:%M:%S %z")
-    d = n
-    if d.tzinfo != None:
-        p = d.strftime("%s")
-        d = datetime.utcfromtimestamp(float(p))
-    return d
+    try:
+        n = d.strftime("%Y-%m-%d %H:%M:%S %z")
+        n = datetime.strptime(n, "%Y-%m-%d %H:%M:%S %z")
+        d = n
+        if d.tzinfo != None:
+            p = d.strftime("%s")
+            d = datetime.utcfromtimestamp(float(p))
+        return d
+    except Exception as e:
+        print(e)
+        return None
+    return None
 
 def opml_to_db():
     import opml
@@ -62,8 +67,10 @@ def input_entries_into_db(feeds, url_feeds):
                     summary = entry.summary
                 except:
                     summary = None
-                e = (entry.title, entry.link, datetime.utcnow(),datetime_converter(entry.published),summary, int(feed_ids[url]))
-                entries.append(e)
+                dt = datetime_converter(entry.published)
+                if dt:
+                    e = (entry.title, entry.link, datetime.utcnow(),dt,summary, int(feed_ids[url]))
+                    entries.append(e)
             update_last_parsed(url, datetime.utcnow())
         insert_new_entries(entries)
 
