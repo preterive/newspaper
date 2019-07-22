@@ -55,7 +55,7 @@ def input_entries_into_db(feeds, url_feeds):
     entries = []
     for url, i in feeds:
         if url != None:
-            print(i.feed.title, len(i.entries))
+            print(i.feed.title, len(i.entries), url)
             for entry in i.entries:
                 #print(entry.link)
                 try: 

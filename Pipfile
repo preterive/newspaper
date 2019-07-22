@@ -11,6 +11,7 @@ requests = "*"
 opml = "*"
 flask = "*"
 python-dateutil = "*"
+gunicorn = "*"
 
 [requires]
 python_version = "3.7"
