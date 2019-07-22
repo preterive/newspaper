@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import os
 app = Flask(__name__)
 
-db = os.path.dirname(os.getcwd())+'/feeds.db'
+db = os.path.dirname(os.path.dirname(__file__))+'/feeds.db'
 
 @app.before_request
 def before_request():
@@ -25,4 +25,3 @@ def hello():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000, host='0.0.0.0')
-    print(db)
