@@ -16,7 +16,7 @@ def time_struct_to_datetime(time_struct):
     return datetime.fromtimestamp(mktime(time_struct))
 
 def datetime_converter(s):
-    d = dateparser.parse(s)
+    d = dateparser.parse(s, settings={'TIMEZONE': 'UTC'})
     # don't know why, but d has to be converted to string and back, else timezone
     # does not work correctly
     try:
