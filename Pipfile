@@ -12,6 +12,7 @@ opml = "*"
 flask = "*"
 python-dateutil = "*"
 gunicorn = "*"
+dateparser = "*"
 
 [requires]
 python_version = "3.7.3"

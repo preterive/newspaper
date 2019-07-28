@@ -5,6 +5,7 @@ import requests
 import multiprocessing as mp
 from datetime import datetime
 from dateutil.parser import parse
+import dateparser
 from time import mktime
 import random
 import os
@@ -15,7 +16,7 @@ def time_struct_to_datetime(time_struct):
     return datetime.fromtimestamp(mktime(time_struct))
 
 def datetime_converter(s):
-    d = parse(s)
+    d = dateparser.parse(s)
     # don't know why, but d has to be converted to string and back, else timezone
     # does not work correctly
     try:
