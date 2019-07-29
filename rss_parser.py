@@ -115,5 +115,6 @@ def main():
 if __name__ == '__main__':
     #opml_to_db()
     create_file_structure()
+    print(datetime.utcnow()) # for log
     main()
 
