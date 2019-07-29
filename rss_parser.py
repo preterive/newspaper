@@ -51,7 +51,6 @@ def download(url, save = True):
     if save:
         dir_path = 'xml_files/'+feed.channel.link.replace('/','_').replace(':','')
         if not os.path.exists(dir_path):
-            #os.mkdir(dir_path)
             os.makedirs(dir_path)
         dt = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
         f = open(dir_path+'/'+dt+'.xml', 'w')
