@@ -3,11 +3,13 @@ from flask import Flask, render_template, request, g, redirect, Response
 from datetime import datetime, timedelta
 import os
 app = Flask(__name__)
+from config import *
 
-db = os.path.dirname(os.path.dirname(__file__))+'/feeds.db'
+#db = os.path.dirname(os.path.dirname(__file__))+'/feeds.db'
 
 @app.before_request
 def before_request():
+    print(db)
     g.db = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
 
 @app.teardown_request
