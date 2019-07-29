@@ -43,20 +43,37 @@ def opml_to_db():
         insert_new_feed(url=url, title=i.feed.title, last_parsed=datetime.utcnow())
 
 def download(url, save = True):
-    r = requests.get(url)
-    if r.status_code != 200:
-        #raise Exception("Status code: "+str(r.status_code))
+    # conditional get
+    headers_path = 'xml_files/headers/'+url.replace('/','_').replace(':','')+'.headers'
+    last_modified, etag = None, None
+    if os.path.exists(headers_path):
+        h = [i.rstrip() for i in open(headers_path, 'r').read().split('\n')]
+        last_modified = h[0] if h[0] != 'None' else None
+        etag = h[1] if h[1] != 'None' else None
+    headers = {'If-Modified-Since':last_modified, 'If-None-Match':etag, 
+            'Last-Modified':last_modified}
+    r = requests.get(url, headers=headers)
+    if r.status_code != 200 and r.status_code != 304:
         return None, None
-    feed = feedparser.parse(r.text)
-    if save:
-        dir_path = 'xml_files/'+feed.channel.link.replace('/','_').replace(':','')
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-        dt = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
-        f = open(dir_path+'/'+dt+'.xml', 'w')
-        f.write(r.text)
-        f.close()
-    return url, feed
+    etag = r.headers.get('ETag')
+    last_modified = r.headers.get('Last-Modified')
+    h = open(headers_path, 'w')
+    h.write(str(last_modified)+'\n'+str(etag))
+    h.close()
+    # parsing
+    if r.status_code == 200:
+        feed = feedparser.parse(r.text)
+        # save xml 
+        if save:
+            dir_path = 'xml_files/'+feed.channel.link.replace('/','_').replace(':','')
+            if not os.path.exists(dir_path):
+                os.makedirs(dir_path)
+            dt = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
+            f = open(dir_path+'/'+dt+'.xml', 'w')
+            f.write(r.text)
+            f.close()
+        return url, feed
+    return None, None
 
 def download_multiple(url_list):
     num_workers = mp.cpu_count()
@@ -83,6 +100,12 @@ def input_entries_into_db(feeds, url_feeds):
             update_last_parsed(url, datetime.utcnow())
         insert_new_entries(entries)
 
+def create_file_structure():
+    if not os.path.exists('xml_files/'):
+        os.mkdir('xml_files/')
+    if not os.path.exists('xml_files/headers/'):
+        os.mkdir('xml_files/headers/')
+
 def main():
 #    url_feeds = select_all_feeds()
     url_feeds = select_need_parsed_feeds()
@@ -91,5 +114,6 @@ def main():
 
 if __name__ == '__main__':
     #opml_to_db()
+    create_file_structure()
     main()
 
