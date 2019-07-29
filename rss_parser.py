@@ -42,12 +42,21 @@ def opml_to_db():
     for url, i in download_multiple(urls):
         insert_new_feed(url=url, title=i.feed.title, last_parsed=datetime.utcnow())
 
-def download(url):
+def download(url, save = True):
     r = requests.get(url)
     if r.status_code != 200:
         #raise Exception("Status code: "+str(r.status_code))
         return None, None
     feed = feedparser.parse(r.text)
+    if save:
+        dir_path = 'xml_files/'+feed.channel.link.replace('/','_').replace(':','')
+        if not os.path.exists(dir_path):
+            #os.mkdir(dir_path)
+            os.makedirs(dir_path)
+        dt = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
+        f = open(dir_path+'/'+dt+'.xml', 'w')
+        f.write(r.text)
+        f.close()
     return url, feed
 
 def download_multiple(url_list):
