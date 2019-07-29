@@ -76,7 +76,7 @@ def download(url, save = True):
     return None, None
 
 def download_multiple(url_list):
-    num_workers = mp.cpu_count()
+    num_workers = mp.cpu_count()*2
     pool = mp.Pool(num_workers)
     feeds = pool.map(download, url_list)
     return feeds
