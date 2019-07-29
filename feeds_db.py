@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime, timedelta
 
 conn = sqlite3.connect('feeds.db', detect_types=sqlite3.PARSE_DECLTYPES)
 
@@ -37,6 +38,12 @@ def select_all_feeds():
     c.execute('select * from feeds')
     return c.fetchall()
 
+def select_need_parsed_feeds():
+    c = conn.cursor()
+    n = datetime.utcnow() - timedelta(0,300)
+    c.execute('select * from feeds where last_parsed <= ?',(n,))
+    return c.fetchall()
+
 def insert_new_entries(entries):
     c = conn.cursor()
     c.executemany('INSERT or ignore into entries (title, url, parsed, published, summary, feed_id) VALUES (?,?,?,?,?,?)', entries)
@@ -55,5 +62,7 @@ if __name__ == '__main__':
     #insert_new_feed('https://www.spiegel.de/schlagzeilen/index.rss', 'SPIEGEL ONLINE - Schlagzeilen')
 
     #update_last_parsed('https://www.spiegel.de/schlagzeilen/index.rss', )
-    for i in select_all_entries():
+    #for i in select_all_entries():
+    #    print(i)
+    for i in select_need_parsed_feeds():
         print(i)

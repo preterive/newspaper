@@ -84,7 +84,8 @@ def input_entries_into_db(feeds, url_feeds):
         insert_new_entries(entries)
 
 def main():
-    url_feeds = select_all_feeds()
+#    url_feeds = select_all_feeds()
+    url_feeds = select_need_parsed_feeds()
     url_list = [i[2] for i in url_feeds]
     input_entries_into_db(download_multiple(url_list), url_feeds)
 
