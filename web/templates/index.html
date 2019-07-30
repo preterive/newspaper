@@ -1,12 +1,13 @@
 <html>
     <head>
+        <script src="/static/moment.js"></script>
         <title>Nachrichten</title>
     </head>
     <h3>Nachrichten - Pre Alpha</h3>
     <hr>
     <body>
         {% for entrie in entries%}
-        <div><p>{{ entrie[4]}}: <a href={{entrie[2]}}>{{ entrie[1]}}</a> {{ entrie[-1] }}</p></div>
+        <div><p>{{ momentjs(entrie[4]).format('YYYY-MM-DD HH:mm')}}: <a href={{entrie[2]}}>{{ entrie[1]}}</a> {{ entrie[-1] }}</p></div>
         {% endfor %}
     </body>
 </html>

@@ -2,8 +2,12 @@ import sqlite3
 from flask import Flask, render_template, request, g, redirect, Response
 from datetime import datetime, timedelta
 import os
-app = Flask(__name__)
 from config import *
+from momentjs import momentjs
+
+app = Flask(__name__)
+
+app.jinja_env.globals['momentjs'] = momentjs
 
 #db = os.path.dirname(os.path.dirname(__file__))+'/feeds.db'
 
