@@ -6,7 +6,7 @@ class momentjs(object):
         
     def render(self, format):
         #return Markup("<script>\ndocument.write(moment(\"%s\").%s);\n</script>" % (self.timestamp.strftime("%Y-%m-%dT%H:%M:%S Z"), format))
-        return Markup("<script>\ndocument.write(dayjs(\"%s\").%s);\n</script>" % (self.timestamp.strftime("%Y-%m-%d %H:%M:%S Z"), format))
+        return Markup("<script>\ndocument.write(dayjs(\"%s\").%s);\n</script>" % (self.timestamp.strftime("%Y-%m-%dT%H:%M:%SZ"), format))
 
     def format(self, fmt):
         return self.render("format(\"%s\")" % fmt)

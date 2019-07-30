@@ -7,7 +7,7 @@
     <hr>
     <body>
         {% for entrie in entries%}
-        <div><p>{{ momentjs(entrie[4]).format('YYYY-MM-DD HH:mm')}}: <a href={{entrie[2]}}>{{ entrie[1]}}</a> {{ entrie[-1] }}</p></div>
+        <div><p>{{ entrie[4]}}: <a href={{entrie[2]}}>{{ entrie[1]}}</a> {{ entrie[-1] }}</p></div>
         {% endfor %}
     </body>
 </html>
