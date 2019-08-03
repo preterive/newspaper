@@ -62,7 +62,5 @@ if __name__ == '__main__':
     #insert_new_feed('https://www.spiegel.de/schlagzeilen/index.rss', 'SPIEGEL ONLINE - Schlagzeilen')
 
     #update_last_parsed('https://www.spiegel.de/schlagzeilen/index.rss', )
-    #for i in select_all_entries():
-    #    print(i)
-    for i in select_need_parsed_feeds():
+    for i in select_all_entries():
         print(i)
