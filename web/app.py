@@ -32,7 +32,7 @@ def teardown_request(exception):
     if hasattr(g, 'db'):
         g.db.close()
 
-#@cache.cached(timeout=60, key_prefix='entries')
+@cache.cached(timeout=60, key_prefix='entries')
 def get_entries():
     now = datetime.utcnow() + timedelta(0,10)
     #now = now.strftime("%Y-%m-%d %H:%M:%S")
