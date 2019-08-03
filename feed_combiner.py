@@ -31,9 +31,9 @@ def combine_feeds(feed_xmls, feed=None, url_list=[], entries=[]):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    #parser.add_argument('xml_files')
+    parser.add_argument('xml_files')
     args = parser.parse_args()
-    xml_files = 'xml_files'
+    xml_files = args.xml_files
     for feed_dir in get_feed_dirs(xml_files):
         xml_files = get_xml_files(feed_dir)
         feed, url_list, entries = get_combined(feed_dir)
