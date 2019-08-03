@@ -6,31 +6,29 @@ import multiprocessing as mp
 from datetime import datetime
 from dateutil.parser import parse
 import dateparser
-from time import mktime
+from time import mktime, strftime
+from calendar import timegm
 import random
 import os
 from multiprocessing import Queue
 from feeds_db import *
 
-def time_struct_to_datetime(time_struct):
-    return datetime.fromtimestamp(mktime(time_struct))
-
-def datetime_converter(s):
-    d = dateparser.parse(s, settings={'TIMEZONE': 'UTC'})
-    # don't know why, but d has to be converted to string and back, else timezone
-    # does not work correctly
-    try:
-        n = d.strftime("%Y-%m-%d %H:%M:%S %z")
-        n = datetime.strptime(n, "%Y-%m-%d %H:%M:%S %z")
-        d = n
-        if d.tzinfo != None:
-            p = d.strftime("%s")
-            d = datetime.utcfromtimestamp(float(p))
-        return d
-    except Exception as e:
-        print(e)
+def cestDateHandler(date_string):
+    '''
+    custom date handler for feedparser 
+    handles cest 
+    '''
+    if 'CEST' in date_string:
+        date_string = date_string.replace('CEST', '+0200')
+        return feedparser._parse_date_rfc822(date_string)
+    else:
         return None
-    return None
+feedparser.registerDateHandler(cestDateHandler)
+
+
+def time_struct_to_datetime(time_struct):
+    return datetime.utcfromtimestamp(timegm(time_struct))
+
 
 def opml_to_db():
     import opml
@@ -93,7 +91,8 @@ def input_entries_into_db(feeds, url_feeds):
                     summary = entry.summary
                 except:
                     summary = None
-                dt = datetime_converter(entry.published)
+                dt = time_struct_to_datetime(entry.published_parsed)
+                #print(entry.published, time_struct_to_datetime(entry.published_parsed), entry.link)
                 if dt:
                     e = (entry.title, entry.link, datetime.utcnow(),dt,summary, int(feed_ids[url]))
                     entries.append(e)
@@ -107,7 +106,7 @@ def create_file_structure():
         os.mkdir('xml_files/headers/')
 
 def main():
-#    url_feeds = select_all_feeds()
+    # url_feeds = select_all_feeds()
     url_feeds = select_need_parsed_feeds()
     url_list = [i[2] for i in url_feeds]
     input_entries_into_db(download_multiple(url_list), url_feeds)
