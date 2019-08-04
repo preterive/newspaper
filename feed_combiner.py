@@ -18,6 +18,9 @@ def get_combined(path):
 
 
 def combine_feeds(feed_xmls, feed=None, url_list=[], entries=[]):
+    '''
+    combines feeds
+    '''
     for feed_xml in feed_xmls:
         f = open(feed_xml, 'r').read()
         d = feedparser.parse(f)
