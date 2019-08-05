@@ -5,7 +5,21 @@ conn = sqlite3.connect('feeds.db', detect_types=sqlite3.PARSE_DECLTYPES)
 
 def create_feeds_table():
     c = conn.cursor()
-    schema= 'CREATE TABLE feeds(id integer primary key,title TEXT, url Text UNIQUE, last_parsed timestamp);'
+    schema= 'CREATE TABLE feeds(id integer primary key,title TEXT, url Text UNIQUE, last_parsed timestamp, better_name TEXT, website_link TEXT);'
+    c.execute(schema)
+    conn.commit()
+    conn.close
+
+def add_better_name_to_feeds():
+    c = conn.cursor()
+    schema= 'ALTER TABLE feeds ADD better_name TEXT;'
+    c.execute(schema)
+    conn.commit()
+    conn.close
+
+def add_website_link_to_feeds():
+    c = conn.cursor()
+    schema= 'ALTER TABLE feeds ADD website_link TEXT;'
     c.execute(schema)
     conn.commit()
     conn.close
@@ -16,13 +30,13 @@ def create_entries_table():
     c.execute(schema)
     conn.commit()
 
-def insert_new_feed(url, title, last_parsed = None):
+def insert_new_feed(url, title, last_parsed = None, better_name = None, website_link = None):
     c = conn.cursor()
-    c.execute('INSERT OR IGNORE INTO feeds(title, url, last_parsed) VALUES (?,?,?)', (title, url, last_parsed))
+    c.execute('INSERT OR IGNORE INTO feeds(title, url, last_parsed, better_name, website_link) VALUES (?,?,?,?,?)', (title, url, last_parsed, better_name, website_link))
     conn.commit()
-def update_last_parsed(url, last_parsed):
+def update_last_parsed(url, last_parsed, website_link = None):
     c = conn.cursor()
-    c.execute('UPDATE feeds SET last_parsed = ? where url = ?', (last_parsed, url))
+    c.execute('UPDATE feeds SET last_parsed = ?, website_link = ? where url = ?', (last_parsed, website_link, url))
     conn.commit()
 
 def delete_feed(url= None, feed_id = None):
@@ -62,5 +76,6 @@ if __name__ == '__main__':
     #insert_new_feed('https://www.spiegel.de/schlagzeilen/index.rss', 'SPIEGEL ONLINE - Schlagzeilen')
 
     #update_last_parsed('https://www.spiegel.de/schlagzeilen/index.rss', )
-    for i in select_all_entries():
-        print(i)
+
+    add_better_name_to_feeds()
+    add_website_link_to_feeds()
