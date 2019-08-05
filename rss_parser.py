@@ -113,6 +113,11 @@ def main():
 
 if __name__ == '__main__':
     #opml_to_db()
+    try:
+        add_better_name_to_feeds()
+        add_website_link_to_feeds()
+    except:
+        pass
     create_file_structure()
     print(datetime.utcnow()) # for log
     main()
