@@ -2,6 +2,7 @@ import sqlite3
 from flask import Flask, render_template, request, g, redirect, Response
 from datetime import datetime, timedelta
 import os
+from urllib.parse import urlparse
 from config import *
 from momentjs import momentjs
 from pytz import timezone
@@ -32,6 +33,13 @@ def teardown_request(exception):
     if hasattr(g, 'db'):
         g.db.close()
 
+@cache.cached(timeout=60, key_prefix='feeds')
+def get_feeds():
+    f = g.db.execute('select * from feeds').fetchall()
+    f = [(i[0],i[1],i[2],i[3],i[4],urlparse(i[5]).netloc.replace('www.','')) for i in f]
+    feeds = dict([(i[0],i) for i in f])
+    return feeds
+
 @cache.cached(timeout=60, key_prefix='entries')
 def get_entries():
     now = datetime.utcnow() + timedelta(0,10)
@@ -44,7 +52,7 @@ def get_entries():
 @app.route("/")
 def hello():
     t = get_entries()
-    return render_template('index.html', entries=t)
+    return render_template('index.html', entries=t, feeds=get_feeds())
 
 
 if __name__ == '__main__':
