@@ -36,17 +36,14 @@ def teardown_request(exception):
 @cache.cached(timeout=60, key_prefix='feeds')
 def get_feeds():
     f = g.db.execute('select * from feeds').fetchall()
-    f = [(i[0],i[1],i[2],i[3],i[4],urlparse(i[5]).netloc.replace('www.','')) for i in f]
+    f = [(i[0],i[1],i[2],i[3],i[4],urlparse(i[2]).netloc.replace('www.','')) for i in f]
     feeds = dict([(i[0],i) for i in f])
     return feeds
 
 @cache.cached(timeout=60, key_prefix='entries')
 def get_entries():
     now = datetime.utcnow() + timedelta(0,10)
-    #now = now.strftime("%Y-%m-%d %H:%M:%S")
     t = g.db.execute('Select * from entries where published<=? order by published desc limit 200',(now,)).fetchall()
-    #t = [(i[0],i[1],i[2],i[3],i[4].astimezone(timezone('Europe/Berlin')),i[5],i[6]) for i in t]
-    # TODO convert datetime to local de time, so that mometjs is not needed
     return t
 
 @app.route("/")
