@@ -23,9 +23,9 @@ app.jinja_env.globals['momentjs'] = momentjs
 
 #db = os.path.dirname(os.path.dirname(__file__))+'/feeds.db'
 
+
 @app.before_request
 def before_request():
-    print(db)
     g.db = sqlite3.connect(db, detect_types=sqlite3.PARSE_DECLTYPES)
 
 @app.teardown_request
