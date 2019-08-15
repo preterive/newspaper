@@ -14,9 +14,6 @@ python-dateutil = "*"
 gunicorn = "*"
 dateparser = "*"
 flask-caching = "*"
-flask-security = "*"
-flask-sqlalchemy = "*"
-bcrypt = "*"
 
 [requires]
 python_version = "3.7.3"
