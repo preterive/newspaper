@@ -7,6 +7,8 @@ import config
 from momentjs import momentjs
 from pytz import timezone
 from flask_caching import Cache
+import feedparser
+import requests
 
 
 c =  {
@@ -49,9 +51,21 @@ def hello():
     t = get_entries()
     return render_template('index.html', entries=t, feeds=get_feeds())
 
-@app.route("/add_feed")
-def add_feed():
-    return render_template("feeds.html")
+@app.route("/add_feed/<string:key>/<path:feed_url>")
+def add_feed(key, feed_url):
+    if key == '345513':
+        r = requests.get(str(feed_url))
+        if r.status_code == 200:
+            feed = feedparser.parse(r.text)
+            dt = datetime.utcnow() - timedelta(0,800)
+            insert_new_feed(feed_url, feed.feed.title, last_parsed=dt,
+                    website_link=feed.feed.link)
+            return redirect("/", 301)
+
+
+def insert_new_feed(url, title, last_parsed = None, better_name = None, website_link = None):
+    g.db.execute('INSERT OR IGNORE INTO feeds(title, url, last_parsed, better_name, website_link) VALUES (?,?,?,?,?)', (title, url, last_parsed, better_name, website_link))
+    g.db.commit()
 
 
 if __name__ == '__main__':
