@@ -55,15 +55,19 @@ def hello():
 @app.route("/add_feed/<string:key>/<path:feed_url>")
 def add_feed(key, feed_url):
     if key == '345513':
-        r = requests.get(str(feed_url))
-        if r.status_code == 200:
-            feed = feedparser.parse(r.text)
-            dt = datetime.utcnow() - timedelta(0,800)
-            insert_new_feed(feed_url, feed.feed.title, last_parsed=dt,
-                    website_link=feed.feed.link)
-            return Response("{'status':'success'}", status=201, mimetype='application/json')
-        else:
-            return Response(json.dumps({'status':'no success', 'code':r.status_code}), status=500, mimetype='application/json')
+        try:
+            r = requests.get(str(feed_url))
+            if r.status_code == 200:
+                feed = feedparser.parse(r.text)
+                dt = datetime.utcnow() - timedelta(0,800)
+                insert_new_feed(feed_url, feed.feed.title, last_parsed=dt,
+                        website_link=feed.feed.link)
+                return Response("{'status':'success'}", status=201, mimetype='application/json')
+            else:
+                return Response(json.dumps({'status':'no success', 'code':r.status_code}), status=500, mimetype='application/json')
+        except Exception as e:
+                return Response(json.dumps({'status':'no success', 'error':str(e)}), status=500, mimetype='application/json')
+
 
 
 def insert_new_feed(url, title, last_parsed = None, better_name = None, website_link = None):
