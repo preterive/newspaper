@@ -7,6 +7,7 @@ import config
 from momentjs import momentjs
 from pytz import timezone
 from flask_caching import Cache
+import json
 import feedparser
 import requests
 
@@ -61,6 +62,8 @@ def add_feed(key, feed_url):
             insert_new_feed(feed_url, feed.feed.title, last_parsed=dt,
                     website_link=feed.feed.link)
             return Response("{'status':'success'}", status=201, mimetype='application/json')
+        else:
+            return Response(json.dumps({'status':'no success', 'code':r.status_code}), status=500, mimetype='application/json')
 
 
 def insert_new_feed(url, title, last_parsed = None, better_name = None, website_link = None):
