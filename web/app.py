@@ -60,7 +60,7 @@ def add_feed(key, feed_url):
             dt = datetime.utcnow() - timedelta(0,800)
             insert_new_feed(feed_url, feed.feed.title, last_parsed=dt,
                     website_link=feed.feed.link)
-            return redirect("/", 301)
+            return Response("{'status':'success'}", status=201, mimetype='application/json')
 
 
 def insert_new_feed(url, title, last_parsed = None, better_name = None, website_link = None):
