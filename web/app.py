@@ -64,7 +64,7 @@ def add_feed(key, feed_url):
                         website_link=feed.feed.link)
                 return Response("{'status':'success'}", status=201, mimetype='application/json')
             else:
-                return Response(json.dumps({'status':'no success', 'code':r.status_code}), status=500, mimetype='application/json')
+                return Response(json.dumps({'status':'no success', 'code':r.status_code, 'url':feed_url}), status=500, mimetype='application/json')
         except Exception as e:
                 return Response(json.dumps({'status':'no success', 'error':str(e)}), status=500, mimetype='application/json')
 
