@@ -1,3 +1,6 @@
 *.swp
 *.db
 xml_files/
+config.py
+*.log
+
