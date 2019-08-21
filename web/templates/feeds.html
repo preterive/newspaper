@@ -1,5 +1,37 @@
 {% extends "base.html" %}        
-{% block entries %}
-Hello
+{% block feeds %}
+
+    <script>
+        function add_feed_url(){
+            var feed_url = document.getElementById("feed_url").value;
+            if (feed_url === ""){
+                return 
+            }
+            var getUrl = window.location;
+            var baseUrl = getUrl.protocol + "//" + getUrl.host;
+            data = {'feed_url':feed_url}
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", baseUrl+"/add_feed/", true);
+            xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+
+            xhr.send(JSON.stringify(data));
+
+            xhr.onloadend = function () {
+                document.getElementById("responseText").innerHTML= xhr.responseText;
+            };
+        }
+    </script>
+
+
+    <form id="feedadder">
+    Feed URL: <input type="text" id="feed_url">
+    </form>
+    <input type="button" value="Add" onclick="add_feed_url()">
+    <div id="responseText"></div>
+
+
+    {% for feed in feeds%}
+    <div>{{feed}}</div>
+    {% endfor %}
 
 {%endblock%}

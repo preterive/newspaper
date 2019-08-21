@@ -119,8 +119,13 @@ def teardown_request(exception):
     if hasattr(g, 'db'):
         g.db.close()
 
-@cache.cached(timeout=60, key_prefix='feeds')
 def get_feeds():
+    f = g.db.execute('select * from feeds').fetchall()
+    #f = [(i[0],i[1],i[2],i[3],i[4],urlparse(i[2]).netloc.replace('www.','')) for i in f]
+    return f
+
+@cache.cached(timeout=60, key_prefix='feeds')
+def get_feeds_dict():
     f = g.db.execute('select * from feeds').fetchall()
     f = [(i[0],i[1],i[2],i[3],i[4],urlparse(i[2]).netloc.replace('www.','')) for i in f]
     feeds = dict([(i[0],i) for i in f])
@@ -135,7 +140,9 @@ def get_entries():
 @app.route("/")
 def hello():
     t = get_entries()
-    return render_template('index.html', entries=t, feeds=get_feeds())
+    if g.user is not None and g.user.is_authenticated:
+        return render_template('index.html', entries=t, feeds=get_feeds_dict(), uuid=g.user.uuid)
+    return render_template('index.html', entries=t, feeds=get_feeds_dict())
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -148,23 +155,36 @@ def login():
         return redirect('/')
     return render_template('login.html', form=form)
 
-@app.route("/add_feed/<string:key>/<path:feed_url>")
+@app.route("/logout")
 @login_required
-def add_feed(key, feed_url):
-    if key == '345513':
-        try:
-            r = requests.get(str(feed_url))
-            if r.status_code == 200:
-                feed = feedparser.parse(r.text)
-                dt = datetime.utcnow() - timedelta(0,800)
-                insert_new_feed(feed_url, feed.feed.title, last_parsed=dt,
-                        website_link=feed.feed.link)
-                return Response("{'status':'success'}", status=201, mimetype='application/json')
-            else:
-                return Response(json.dumps({'status':'no success', 'code':r.status_code, 'url':feed_url}), status=500, mimetype='application/json')
-        except Exception as e:
-                return Response(json.dumps({'status':'no success', 'error':str(e)}), status=500, mimetype='application/json')
+def logout():
+    if g.user is not None and g.user.is_authenticated:
+         logout_user()
+    return redirect('/login')
 
+@app.route("/add_feed/", methods=['POST'])
+@login_required
+def add_feed():
+    try:
+        if request.method == 'POST':
+            if request.json:
+                feed_url = request.json['feed_url'] 
+                r = requests.get(str(feed_url))
+                if r.status_code == 200:
+                    feed = feedparser.parse(r.text)
+                    dt = datetime.utcnow() - timedelta(0,800)
+                    insert_new_feed(feed_url, feed.feed.title, last_parsed=dt,
+                            website_link=feed.feed.link)
+                    return Response("{'status':'success'}", status=201, mimetype='application/json')
+                else:
+                    return Response(json.dumps({'status':'no success', 'code':r.status_code, 'url':feed_url}), status=500, mimetype='application/json')
+    except Exception as e:
+            return Response(json.dumps({'status':'no success', 'error':str(e)}), status=500, mimetype='application/json')
+
+@app.route("/feeds/")
+@login_required
+def feeds():
+    return render_template('feeds.html', feeds=get_feeds(), uuid = g.user.uuid)
 
 
 def insert_new_feed(url, title, last_parsed = None, better_name = None, website_link = None):

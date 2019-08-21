@@ -3,7 +3,9 @@
     <head>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script src="/static/dayjs.min.js"></script>
-
+        {%if uuid %}
+            <script>var uuid = "{{uuid}}"</script>
+        {%endif%}
         <script async src="https://events.keingenie.de/static/events.js"></script>
         <style>
             body {font-size: 110%;}
@@ -19,6 +21,8 @@
         {% block entries %}
         {% endblock %}
         {% block login%}
+        {% endblock %}
+        {% block feeds%}
         {% endblock %}
     </body>
 </html>
