@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block login %}
+<form method="POST" action="/login">
+    {{ form.hidden_tag() }}
+    <p>{{ form.email.label }}: {{ form.email(size=20) }}</p>
+    <p>{{ form.pwd.label }}: {{ form.pwd(size=20) }}</p> 
+    <p>Auf diesem Computer merkern: {{ form.remember_me }}</p>
+   <input type="submit" value="Go">
+</form>
+{% endblock  %}

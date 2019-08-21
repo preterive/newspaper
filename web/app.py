@@ -10,10 +10,23 @@ from flask_caching import Cache
 import json
 import feedparser
 import requests
+from flask_sqlalchemy import SQLAlchemy
+from passlib.hash import bcrypt
+import uuid
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, HiddenField
+from wtforms.validators import DataRequired
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required
+
+import logging
+logging.basicConfig(filename='webapp.log',level=logging.DEBUG)
 
 
 c =  {
     "DEBUG":config.c_debug,
+    "SQLALCHEMY_DATABASE_URI":config.alchemy_uri,
+    "SECRET_KEY":config.secret_key,
+    "SQLALCHEMY_TRACK_MODIFICATIONS":False,
     "CACHE_TYPE": "simple", # Flask-Caching related configs
     "CACHE_DEFAULT_TIMEOUT": 300
    }
@@ -24,10 +37,82 @@ cache = Cache(app)
 
 app.jinja_env.globals['momentjs'] = momentjs
 
+lm = LoginManager()
+lm.init_app(app)
+
+db = SQLAlchemy(app)
+
+class LoginForm(FlaskForm):
+    email = StringField('email', validators=[DataRequired()])
+    pwd = PasswordField('Passwort', validators=[DataRequired()])
+    remember_me = BooleanField('remember_me', default=False)
+
+    def __init__(self, *args, **kwargs):
+        FlaskForm.__init__(self, *args, **kwargs)
+        self.user = None
+
+    def validate(self):
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
+        self.email.data = self.email.data.strip()
+        user = User.query.filter_by(
+            email=self.email.data).first()
+        if user is None:
+            self.name.errors.append('Falsche Daten')
+            return False
+
+        if not user.check_password(self.pwd.data):
+            self.pwd.errors.append('Falsche Daten')
+            return False
+
+        self.user = user
+        return True
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(300), index=True, unique=True, nullable=False)
+    pwd_hash = db.Column(db.String(300), nullable=False)
+    uuid = db.Column(db.String(300), index=True, unique=True, nullable=False)
+    
+    def __init__(self, email, pwd):
+        self.email = email
+        self.pwd_hash = bcrypt.encrypt(pwd)
+        self.uuid = str(uuid.uuid4())
+    
+    @property
+    def is_authenticated(self):
+        return True
+    
+    @property
+    def is_active(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False    
+    
+    def get_id(self):
+        return str(self.id)
+
+    def check_password(self, password):
+        return bcrypt.verify(password, self.pwd_hash)
+
+    def __repr__(self):
+        return '<User %r>' % (self.email)
+
+@lm.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
+@lm.unauthorized_handler
+def unauthorized_callback():
+    return redirect('/login')
 
 @app.before_request
 def before_request():
     g.db = sqlite3.connect(config.db, detect_types=sqlite3.PARSE_DECLTYPES)
+    g.user = current_user
 
 @app.teardown_request
 def teardown_request(exception):
@@ -52,7 +137,19 @@ def hello():
     t = get_entries()
     return render_template('index.html', entries=t, feeds=get_feeds())
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if g.user is not None and g.user.is_authenticated:
+        return redirect('/')
+    
+    form = LoginForm()
+    if form.validate_on_submit():
+        login_user(form.user, remember = form.remember_me)
+        return redirect('/')
+    return render_template('login.html', form=form)
+
 @app.route("/add_feed/<string:key>/<path:feed_url>")
+@login_required
 def add_feed(key, feed_url):
     if key == '345513':
         try:
