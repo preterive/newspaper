@@ -1,7 +1,42 @@
 {% extends "base.html" %}        
 {% block entries %}
-{% for entrie in entries%}
-    <div><p>{{ momentjs(entrie[4]).format('YYYY-MM-DD HH:mm')}}: <a href={{entrie[2]}}>{{ entrie[1]}}</a> {{ feeds[entrie[-1]][5] }}</p></div>
-{% endfor %}
+
+    <script>
+        var webstorage = false;
+        window.onload = function(){
+            if (typeof(Storage) !== "undefined") {
+                webstorage = true;
+            }
+            if (webstorage==true){
+                if (localStorage.getItem("newtab") == "true"){
+                    document.getElementById("newtab").checked = true;
+                    newtab();
+                }
+            }
+        }
+
+        function newtab(){
+            var cb = document.getElementById("newtab");
+            var entries = document.getElementsByName("entrie");
+            if (cb.checked == true){
+                entries.forEach(function(e) {
+                    e.getElementsByTagName("a")[0].target = "_blank"
+                });
+                if (webstorage==true){ localStorage.setItem("newtab", "true");}
+            } else {
+                entries.forEach(function(e) {
+                    e.getElementsByTagName("a")[0].target = ""
+                });
+                if (webstorage==true){ localStorage.setItem("newtab", "false");}
+            }
+
+        }
+    </script>
+
+    <input type="checkbox" id="newtab" onclick="newtab()"> 
+    <label for="newtab">Links im neuem Tab öffnen</label>
+    {% for entrie in entries%}
+        <div name="entrie"><p>{{ momentjs(entrie[4]).format('YYYY-MM-DD HH:mm')}}: <a rel="noopener" href={{entrie[2]}}>{{ entrie[1]}}</a> {{ feeds[entrie[-1]][5] }}</p></div>
+    {% endfor %}
 
 {%endblock%}
