@@ -1,42 +1,136 @@
 {% extends "base.html" %}        
 {% block entries %}
 
-    <script>
-        var webstorage = false;
-        window.onload = function(){
-            if (typeof(Storage) !== "undefined") {
-                webstorage = true;
+<style>
+    .filterOptions li {
+        display: inline;
+        padding: 0.5%;
+    }
+    .filterOptions li:hover { background-color: #FF4500;}
+    .filterOptions ul {
+        display: inline;
+    }
+</style>
+
+
+<script>
+    var webstorage = false;
+    window.onload = function(){
+        if (typeof(Storage) !== "undefined") {
+            webstorage = true;
+            if (localStorage.getItem("filterWords")===null){
+                localStorage.setItem("filterWords", JSON.stringify([]));
             }
-            if (webstorage==true){
-                if (localStorage.getItem("newtab") == "true"){
-                    document.getElementById("newtab").checked = true;
-                    newtab();
+        }
+        if (webstorage==true){
+            if (localStorage.getItem("newtab") == "true"){
+                document.getElementById("newtab").checked = true;
+                newtab();
+                filterOut()
+            }
+        }
+    }
+    function removeA(arr) {
+        var what, a = arguments, L = a.length, ax;
+        while (L > 1 && arr.length) {
+            what = a[--L];
+            while ((ax= arr.indexOf(what)) !== -1) {
+                arr.splice(ax, 1);
+            }
+        }
+        return arr;
+    }
+
+    function newtab(){
+        var cb = document.getElementById("newtab");
+        var entries = document.getElementsByClassName("entrie");
+        if (cb.checked == true){
+            for (i = 0; i < entries.length; i++) {
+                entries[i].getElementsByTagName("a")[0].target = "_blank"
+            }
+            if (webstorage==true){ localStorage.setItem("newtab", "true");}
+        } else {
+            for (i = 0; i < entries.length; i++) {
+                entries[i].getElementsByTagName("a")[0].target = ""
+            }
+            if (webstorage==true){ localStorage.setItem("newtab", "false");}
+        }
+
+    }
+    function filterOut() {
+        var entries = document.getElementsByClassName("entrie");
+        var filterWords = JSON.parse(localStorage.getItem("filterWords"));
+        for (var i = entries.length-1; i != -1; i--) {
+            var e = entries[i]
+            if (filterWords.includes(e.getElementsByClassName("website")[0].innerHTML)){
+                e.parentNode.removeChild(e);
+            }
+        }
+    }
+    function openClosefilterOptions(e){
+        e = e.parentNode.parentNode.getElementsByClassName("filterOptions")[0]
+        if (e.style.display === "none"){
+            e.style.display = "inline"
+            fw = e.getElementsByClassName("filterWord")
+            for (var i = fw.length-1; i != -1; i--) {
+                console.log(fw[i].innerHTML)
+                if (JSON.parse(localStorage.getItem("filterWords")).includes(fw[i].innerHTML)){
+                    console.log('op1')
+                    fw[i].style.backgroundColor = "#FF4500";
+                } else {
+                    console.log('op2')
+                    fw[i].style.backgroundColor = "#7FFF0";
                 }
             }
+        } else {
+            e.style.display = "none"
         }
-
-        function newtab(){
-            var cb = document.getElementById("newtab");
-            var entries = document.getElementsByName("entrie");
-            if (cb.checked == true){
-                entries.forEach(function(e) {
-                    e.getElementsByTagName("a")[0].target = "_blank"
-                });
-                if (webstorage==true){ localStorage.setItem("newtab", "true");}
-            } else {
-                entries.forEach(function(e) {
-                    e.getElementsByTagName("a")[0].target = ""
-                });
-                if (webstorage==true){ localStorage.setItem("newtab", "false");}
-            }
-
+    }
+    function addRemoveFilterWord(word){
+        var filterWords = JSON.parse(localStorage.getItem("filterWords"));
+        if (filterWords.includes(word)){
+            removeA(filterWords, word);
+        } else {
+            filterWords.push(word)
         }
-    </script>
+        localStorage.setItem("filterWords", JSON.stringify(filterWords));
+    }
+    function filterOptionsAddRemove(e){
+        if (JSON.parse(localStorage.getItem("filterWords")).includes(e.innerHTML)){
+            console.log('fo1')
+            e.style.backgroundColor = "#7FFF0";
+            addRemoveFilterWord(e.innerHTML)
 
-    <input type="checkbox" id="newtab" onclick="newtab()"> 
-    <label for="newtab">Links im neuem Tab öffnen</label>
-    {% for entrie in entries%}
-        <div name="entrie"><p>{{ momentjs(entrie[4]).format('YYYY-MM-DD HH:mm')}}: <a rel="noopener" href={{entrie[2]}}>{{ entrie[1]}}</a> {{ feeds[entrie[-1]][5] }}</p></div>
-    {% endfor %}
+        } else {
+            console.log('fo2')
+            e.style.backgroundColor = "#FF4500";
+            addRemoveFilterWord(e.innerHTML)
+        }
+        filterOut()
+    }
+</script>
+
+<input type="checkbox" id="newtab" onclick="newtab()"> 
+<label for="newtab">Links im neuem Tab öffnen</label>
+{% for entrie in entries%}
+<div class="entrie">
+    <p>
+    {%if g.user.uuid %}
+        <span class="datetime" onclick="openClosefilterOptions(this)">{{ momentjs(entrie[4]).format('YYYY-MM-DD HH:mm')}}: </span>
+    {%else%}
+        <span class="datetime">{{ momentjs(entrie[4]).format('YYYY-MM-DD HH:mm')}}: </span>
+    {%endif%}
+    <a rel="noopener" href={{entrie[2]}}>{{ entrie[1]}}</a> 
+    <span class="website">{{ feeds[entrie[-1]][5] }}</span>
+
+    <div style="display:none;" class="filterOptions">
+        Filter
+        <ul>
+            <li class="filterWord" onclick="filterOptionsAddRemove(this)">{{feeds[entrie[-1]][5]}}</li>
+        </ul>
+    </diV>
+    </p>
+</div>
+{% endfor %}
 
 {%endblock%}
