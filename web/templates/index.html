@@ -5,6 +5,7 @@
     .filterOptions li {
         display: inline;
         padding: 0.5%;
+        margin-right: 0.5%;
     }
     .filterOptions li:hover { background-color: #FF4500;}
     .filterOptions ul {
@@ -26,7 +27,9 @@
             if (localStorage.getItem("newtab") == "true"){
                 document.getElementById("newtab").checked = true;
                 newtab();
-                filterOut()
+                if (typeof uuid !== "undefined") {
+                    filterOut()
+                }
             }
         }
     }
@@ -73,12 +76,9 @@
             e.style.display = "inline"
             fw = e.getElementsByClassName("filterWord")
             for (var i = fw.length-1; i != -1; i--) {
-                console.log(fw[i].innerHTML)
                 if (JSON.parse(localStorage.getItem("filterWords")).includes(fw[i].innerHTML)){
-                    console.log('op1')
                     fw[i].style.backgroundColor = "#FF4500";
                 } else {
-                    console.log('op2')
                     fw[i].style.backgroundColor = "#7FFF0";
                 }
             }
@@ -97,21 +97,44 @@
     }
     function filterOptionsAddRemove(e){
         if (JSON.parse(localStorage.getItem("filterWords")).includes(e.innerHTML)){
-            console.log('fo1')
-            e.style.backgroundColor = "#7FFF0";
+            e.style.backgroundColor = "#7FFF00";
             addRemoveFilterWord(e.innerHTML)
 
         } else {
-            console.log('fo2')
             e.style.backgroundColor = "#FF4500";
             addRemoveFilterWord(e.innerHTML)
         }
         filterOut()
     }
+    
+    function createFilterBox(e){
+        s = document.getElementsByClassName("filterOptions")[0]
+        ul = s.getElementsByTagName("ul")[0]
+        new_ul = document.createElement("ul")
+        var filterWords = JSON.parse(localStorage.getItem("filterWords"));
+        for (var i=0; i < filterWords.length; i++) {
+            var node = document.createElement("li");
+            node.setAttribute("class","filterWord")
+            node.setAttribute("onclick", "filterOptionsAddRemove(this)")
+            node.innerHTML = filterWords[i]
+            new_ul.appendChild(node)
+        }
+        s.removeChild(ul)
+        s.appendChild(new_ul)
+        openClosefilterOptions(e)
+    }
 </script>
 
 <input type="checkbox" id="newtab" onclick="newtab()"> 
 <label for="newtab">Links im neuem Tab öffnen</label>
+{%if g.user.uuid %}
+<div onclick="createFilterBox(this)" class="allFilter">Filter</div>
+    <div style="display:none;" class="filterOptions">
+        <ul>
+            <li class="filterWord" onclick="filterOptionsAddRemove(this)">bild.de</li>
+        </ul>
+    </div>
+{%endif%}
 {% for entrie in entries%}
 <div class="entrie">
     <p>
