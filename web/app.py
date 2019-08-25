@@ -17,6 +17,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, HiddenField
 from wtforms.validators import DataRequired
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required
+from roles import roles
 
 import logging
 logging.basicConfig(filename='webapp.log',level=logging.DEBUG)
@@ -74,11 +75,13 @@ class User(db.Model):
     email = db.Column(db.String(300), index=True, unique=True, nullable=False)
     pwd_hash = db.Column(db.String(300), nullable=False)
     uuid = db.Column(db.String(300), index=True, unique=True, nullable=False)
+    role = db.Column(db.String(300))
     
-    def __init__(self, email, pwd):
+    def __init__(self, email, pwd, role=None):
         self.email = email
         self.pwd_hash = bcrypt.encrypt(pwd)
         self.uuid = str(uuid.uuid4())
+        self.role = role
     
     @property
     def is_authenticated(self):
@@ -183,6 +186,7 @@ def add_feed():
 
 @app.route("/feeds/")
 @login_required
+@roles(roles=['god'])
 def feeds():
     return render_template('feeds.html', feeds=get_feeds(), uuid = g.user.uuid)
 
