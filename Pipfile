@@ -20,6 +20,7 @@ flask-sqlalchemy = "*"
 passlib = "*"
 wtforms = "*"
 flask-login = "*"
+bs4 = "*"
 
 [requires]
 python_version = "3.7.3"
