@@ -167,6 +167,7 @@ def logout():
 
 @app.route("/add_feed/", methods=['POST'])
 @login_required
+@roles(roles=['god'])
 def add_feed():
     try:
         if request.method == 'POST':
@@ -176,6 +177,7 @@ def add_feed():
                 if r.status_code == 200:
                     feed = feedparser.parse(r.text)
                     dt = datetime.utcnow() - timedelta(0,800)
+                    print(feed_url)
                     insert_new_feed(feed_url, feed.feed.title, last_parsed=dt,
                             website_link=feed.feed.link)
                     return Response("{'status':'success'}", status=201, mimetype='application/json')

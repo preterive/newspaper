@@ -97,7 +97,9 @@ def input_entries_into_db(feeds, url_feeds):
                 if dt:
                     if summary:
                         summary = BeautifulSoup(entry.summary, "lxml").text
-                    e = (entry.title, entry.link, datetime.utcnow(),dt,summary, int(feed_ids[url]))
+                    title = BeautifulSoup(entry.title, "lxml").text
+
+                    e = (title, entry.link, datetime.utcnow(),dt,summary, int(feed_ids[url]))
                     entries.append(e)
             update_last_parsed(url, datetime.utcnow(), website_link=i.feed.link)
         insert_new_entries(entries)
