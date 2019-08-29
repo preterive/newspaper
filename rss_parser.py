@@ -12,6 +12,7 @@ import random
 import os
 from multiprocessing import Queue
 from feeds_db import *
+from bs4 import BeautifulSoup
 
 def cestDateHandler(date_string):
     '''
@@ -94,6 +95,8 @@ def input_entries_into_db(feeds, url_feeds):
                 dt = time_struct_to_datetime(entry.published_parsed)
                 #print(entry.published, time_struct_to_datetime(entry.published_parsed), entry.link)
                 if dt:
+                    if summary:
+                        summary = BeautifulSoup(entry.summary, "lxml").text
                     e = (entry.title, entry.link, datetime.utcnow(),dt,summary, int(feed_ids[url]))
                     entries.append(e)
             update_last_parsed(url, datetime.utcnow(), website_link=i.feed.link)
