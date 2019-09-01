@@ -2,15 +2,15 @@ import feedparser
 
 import requests
 
-import multiprocessing as mp
+#import multiprocessing as mp
+from pathos.multiprocessing import ProcessingPool as Pool
 from datetime import datetime
 from dateutil.parser import parse
 import dateparser
-from time import mktime, strftime
+from time import mktime, strftime, sleep
 from calendar import timegm
 import random
 import os
-from multiprocessing import Queue
 from feeds_db import *
 from bs4 import BeautifulSoup
 
@@ -56,28 +56,36 @@ def download(url, save = True):
         return None, None
     etag = r.headers.get('ETag')
     last_modified = r.headers.get('Last-Modified')
-    h = open(headers_path, 'w')
-    h.write(str(last_modified)+'\n'+str(etag))
-    h.close()
+    with open(headers_path, 'w') as h:
+        h.write(str(last_modified)+'\n'+str(etag))
     # parsing
     if r.status_code == 200:
-        feed = feedparser.parse(r.text)
+        try:
+            feed = feedparser.parse(r.text)
+        except Exception as e:
+            print(e)
+            return None, None
+
         # save xml 
         if save:
             dir_path = 'xml_files/'+feed.channel.link.replace('/','_').replace(':','')
             if not os.path.exists(dir_path):
                 os.makedirs(dir_path)
             dt = datetime.utcnow().strftime('%Y%m%d-%H%M%S')
-            f = open(dir_path+'/'+dt+'.xml', 'w')
-            f.write(r.text)
-            f.close()
+            with open(dir_path+'/'+dt+'.xml', 'w') as f:
+                f.write(r.text)
         return url, feed
     return None, None
 
 def download_multiple(url_list):
-    num_workers = mp.cpu_count()*2
-    pool = mp.Pool(num_workers)
-    feeds = pool.map(download, url_list)
+    #num_workers = mp.cpu_count()*2
+    num_workers = 1
+    #pool = mp.Pool(num_workers)
+    #pool = Pool(num_workers)
+    #feeds = pool.map(download, url_list)
+    feeds = []
+    for a in url_list:
+        feeds.append(download(a))
     return feeds
 
 def input_entries_into_db(feeds, url_feeds):
@@ -87,20 +95,20 @@ def input_entries_into_db(feeds, url_feeds):
         if url != None:
             print(i.feed.title, len(i.entries), url)
             for entry in i.entries:
-                #print(entry.link)
-                try: 
-                    summary = entry.summary
-                except:
-                    summary = None
-                dt = time_struct_to_datetime(entry.published_parsed)
-                #print(entry.published, time_struct_to_datetime(entry.published_parsed), entry.link)
-                if dt:
-                    if summary:
-                        summary = BeautifulSoup(entry.summary, "lxml").text
-                    title = BeautifulSoup(entry.title, "lxml").text
+                if entry:
+                    try: 
+                        summary = entry.summary
+                    except:
+                        summary = None
+                    dt = time_struct_to_datetime(entry.published_parsed)
+                    #print(entry.published, time_struct_to_datetime(entry.published_parsed), entry.link)
+                    if dt:
+                        if summary:
+                            summary = BeautifulSoup(entry.summary, "lxml").text
+                        title = BeautifulSoup(entry.title, "lxml").text
 
-                    e = (title, entry.link, datetime.utcnow(),dt,summary, int(feed_ids[url]))
-                    entries.append(e)
+                        e = (title, entry.link, datetime.utcnow(),dt,summary, int(feed_ids[url]))
+                        entries.append(e)
             update_last_parsed(url, datetime.utcnow(), website_link=i.feed.link)
         insert_new_entries(entries)
 

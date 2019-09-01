@@ -21,6 +21,7 @@ passlib = "*"
 wtforms = "*"
 flask-login = "*"
 bs4 = "*"
+pathos = "*"
 
 [requires]
 python_version = "3.7.3"
