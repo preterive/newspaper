@@ -25,10 +25,13 @@ def combine_feeds(feed_xmls, feed=None, url_list=[], entries=[]):
         f = open(feed_xml, 'r').read()
         d = feedparser.parse(f)
         for e in d.entries:
-            url = e.link
-            if url not in url_list:
-                url_list.append(url)
-                entries.append(e)
+            try:
+                url = e.link
+                if url not in url_list:
+                    url_list.append(url)
+                    entries.append(e)
+            except:
+                print('No link found')
         feed = d.feed
     return feed, url_list, entries
 
