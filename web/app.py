@@ -137,7 +137,7 @@ def get_feeds_dict():
 @cache.cached(timeout=60, key_prefix='entries')
 def get_entries():
     now = datetime.utcnow() + timedelta(0,10)
-    t = g.db.execute('Select * from entries where published<=? order by published desc limit 200',(now,)).fetchall()
+    t = g.db.execute('Select * from entries where published<=? order by published desc limit 100',(now,)).fetchall()
     return t
 
 @app.route("/")
